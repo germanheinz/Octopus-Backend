@@ -7,13 +7,16 @@ const { dbConnection } = require('./db/config');
 
 const app = express();
 
-// Config Cors
+// CONFIG CORS
 app.use(cors());
 
 app.use(express.json());
 
-// DataBase
+// DATABASE
 dbConnection();
+
+//PUBLIC DIRECTORY
+app.use(express.static('public'));
 
 app.use('/api/user', require('./routes/user_routes'));
 app.use('/api/login', require('./routes/auth_routes'));

@@ -12,11 +12,9 @@ router.get('/', validateJWT, getUsers);
 
 // Adding Middleware in second param
 router.post('/', [
-    validateJWT,
     check('name', 'name required').not().isEmpty(),
     check('email', 'Please, write a correct email').isEmail(),
     check('password', 'name required').not().isEmpty(),
-    validateObject,
 ], createUser);
 
 router.put('/:uid', [
