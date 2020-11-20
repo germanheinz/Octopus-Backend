@@ -2,6 +2,8 @@ const { response } = require('express');
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const { generateJWT } = require('../helpers/jwt');
+const stripe = require('stripe')('sk_test_51HpFb4EMPE3A40nBzlQv0k0V5FhwpxOK46sugfWNRSs7bgQ4LVAxvmhUFiWl7tEfZrhxX02DhxsOKKomBjjLVpJx00sBPcJsKI');
+
 
 const getUsers = async(req, res) => {
 
@@ -24,6 +26,7 @@ const getUsers = async(req, res) => {
     });
 }
 
+
 // Save - Create User
 const createUser = async(req, res = response) => {
 
@@ -40,7 +43,19 @@ const createUser = async(req, res = response) => {
             });
         }
         
-        const user = new User(req.body);
+       const user = new User(req.body);
+       
+        /**
+         ** CLIENT CREATOR
+        **/
+       const customer = await stripe.customers.create({
+           description: '',
+           name: user.name,
+           email: user.email
+       });
+   
+       const{ id } = customer;
+       user.stripeId = id; 
 
         // Crypt password
         const salt    = bcrypt.genSaltSync();
@@ -49,6 +64,7 @@ const createUser = async(req, res = response) => {
         const token = await generateJWT(user.id);
 
         await user.save();
+
         res.json({
             ok: true,
             user,

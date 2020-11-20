@@ -3,6 +3,8 @@ const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const { generateJWT } = require('../helpers/jwt');
 const { googleVerify } = require('../helpers/google-verify');
+const stripe = require('stripe')('sk_test_51HpFb4EMPE3A40nBzlQv0k0V5FhwpxOK46sugfWNRSs7bgQ4LVAxvmhUFiWl7tEfZrhxX02DhxsOKKomBjjLVpJx00sBPcJsKI');
+
 
 const login = async(req, res = response) => {
 
@@ -52,21 +54,34 @@ const googleSignIn = async(req, res = response) => {
         const userDB = await User.findOne({email});
         let user;
 
-        if(!userDB){
+        if(!userDB){      
             user = new User({
                 name,
                 email,
                 password: ':)',
                 img: picture,
                 google: true
+            });     
+            /**
+                ** CLIENT CREATOR
+            **/
+            const customer = await stripe.customers.create({
+                description: '',
+                name: user.name,
+                email: user.email
             });
+        
+            const{ id } = customer;
+            user.stripeId = id; 
+
+
         } else {
             user = userDB;
             user.google = true;
         }
 
         await user.save();
-        const token = await generateJWT(userDB.id);
+        const token = await generateJWT(user.id);
 
         res.json({
             ok: true,

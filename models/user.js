@@ -24,7 +24,10 @@ const UserSchema = Schema({
     },
     google:{
         type: Boolean,
-        defaul: false
+        default: false
+    },
+    stripeId:{
+        type: String,
     },
 });
 
